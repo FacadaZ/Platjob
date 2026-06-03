@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+ 
+# agregar md 
+
+API_BODIES.md
+platjob_backend.md
+.env
