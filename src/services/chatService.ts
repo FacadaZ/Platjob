@@ -110,5 +110,9 @@ export const chatService = {
   async acceptNegotiation(id_conversacion: string, messageId: string | number): Promise<ChatMessage> {
     const respuesta = await apiClient.post(`/conversations/${id_conversacion}/negotiate/${messageId}/accept`);
     return mapearMensajeAlFrontend(respuesta.data);
+  },
+
+  async deleteConversation(id_conversacion: string): Promise<void> {
+    await apiClient.delete(`/conversations/${id_conversacion}`);
   }
 };

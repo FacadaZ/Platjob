@@ -70,6 +70,9 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error: any) {
           set({ isLoading: false });
           localStorage.removeItem(STORAGE_KEYS.TOKEN);
+          if (error.response?.data?.errors?.length > 0) {
+            throw error.response.data; // Pasa el objeto completo para manejarlo en LoginPage
+          }
           throw new Error(error.response?.data?.message || "Credenciales inválidas");
         }
       },

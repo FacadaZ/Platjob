@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/HeroUICompat";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store";
 import { ROUTES } from "@/constants";
 import { usePageTitle } from "@/hooks";
@@ -32,6 +32,9 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   usePageTitle("Iniciar Sesión");
   const [showPassword, setShowPassword] = useState(false);
+  const [suspensionData, setSuspensionData] = useState<{ reason: string; suspendedUntil: string } | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [canRetry, setCanRetry] = useState(false);
   const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,12 +51,47 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" }
   });
 
+  useEffect(() => {
+    if (!suspensionData?.suspendedUntil) return;
+    
+    const targetDate = new Date(suspensionData.suspendedUntil).getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        clearInterval(interval);
+        setTimeRemaining("00:00:00");
+        setCanRetry(true);
+      } else {
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        const daysStr = d > 0 ? `${d}d ` : '';
+        setTimeRemaining(`${daysStr}${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [suspensionData]);
+
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data);
       navigate(from, { replace: true });
-    } catch {
-      setError("email", { message: "Credenciales inválidas. Usa carlos@example.com" });
+    } catch (error: any) {
+      if (error.errors && error.errors[0]?.code === 'USER_SUSPENDED') {
+        setSuspensionData({
+          reason: error.errors[0].reason,
+          suspendedUntil: error.errors[0].suspendedUntil
+        });
+        setCanRetry(false);
+      } else {
+        setError("email", { message: error.message || "Credenciales inválidas." });
+      }
     }
   };
 
@@ -163,6 +201,65 @@ export default function LoginPage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Suspension Modal */}
+      {suspensionData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-red-100 text-center">
+            <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h3 className="text-2xl font-black text-text-primary mb-2">
+              Cuenta Suspendida
+            </h3>
+            <p className="text-text-secondary mb-6 text-sm">
+              Tu acceso a PlatJob ha sido temporalmente restringido.
+            </p>
+            
+            <div className="bg-gray-50 rounded-2xl p-4 text-left space-y-3 mb-6">
+              <div>
+                <span className="text-xs text-text-muted font-bold uppercase tracking-wider block">Motivo</span>
+                <span className="text-sm font-medium text-text-primary">{suspensionData.reason}</span>
+              </div>
+              <Separator />
+              <div>
+                <span className="text-xs text-text-muted font-bold uppercase tracking-wider block">Tiempo Restante</span>
+                <span className="text-xl font-mono font-black text-red-500 block mt-1">{timeRemaining || "Calculando..."}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {canRetry ? (
+                <Button
+                  color="primary"
+                  className="w-full font-bold shadow-brand bg-brand-gradient h-12 rounded-xl"
+                  onClick={() => {
+                    setSuspensionData(null);
+                    // trigger login attempt again
+                    handleSubmit(onSubmit)();
+                  }}
+                >
+                  Volver a intentar
+                </Button>
+              ) : (
+                <Button
+                  isDisabled
+                  className="w-full font-bold h-12 rounded-xl bg-gray-100 text-gray-400"
+                >
+                  Bloqueado
+                </Button>
+              )}
+              <Button
+                variant="light"
+                className="font-semibold text-text-muted"
+                onClick={() => setSuspensionData(null)}
+              >
+                Cerrar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

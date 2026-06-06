@@ -44,6 +44,12 @@ export default function AdminDashboardPage() {
   const [newLabel, setNewLabel] = useState<string>("");
   const [isSubmittingCategory, setIsSubmittingCategory] = useState<boolean>(false);
 
+  // Suspension Modal
+  const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
+  const [userToSuspend, setUserToSuspend] = useState<AdminUser | null>(null);
+  const [suspensionReason, setSuspensionReason] = useState("");
+  const [suspendDays, setSuspendDays] = useState("1");
+
   // Load Users
   const fetchUsers = async () => {
     setIsLoadingUsers(true);
@@ -85,9 +91,6 @@ export default function AdminDashboardPage() {
 
   // Block/Unblock User
   const handleToggleBlock = async (user: AdminUser) => {
-    const targetStatus = user.status === "ACTIVE" ? "BLOCKED" : "ACTIVE";
-    const statusText = targetStatus === "BLOCKED" ? "bloquear" : "desbloquear";
-
     if (user.role === "ADMIN") {
       addToast({
         type: "error",
@@ -97,24 +100,76 @@ export default function AdminDashboardPage() {
       return;
     }
 
+    if (user.status === "ACTIVE") {
+      // Abrir modal para suspender
+      setUserToSuspend(user);
+      setSuspensionReason("");
+      setSuspendDays("1");
+      setIsSuspendModalOpen(true);
+      return;
+    }
+
+    // Desbloquear (reactivar)
     try {
-      const updated = await adminService.toggleUserBlock(user.id, targetStatus);
-      
-      // Update local state
+      const updated = await adminService.toggleUserBlock(user.id, "ACTIVE");
       setUsers((prev) =>
         prev.map((u) => (u.id === user.id ? { ...u, status: updated.status } : u))
       );
-
       addToast({
         type: "success",
-        title: `Usuario ${targetStatus === "BLOCKED" ? "bloqueado" : "desbloqueado"}`,
-        message: `La cuenta de ${user.name} ha sido ${targetStatus === "BLOCKED" ? "suspendida" : "reactivada"} con éxito.`,
+        title: "Usuario reactivado",
+        message: `La cuenta de ${user.name} ha sido reactivada con éxito.`,
       });
     } catch (error: any) {
       addToast({
         type: "error",
-        title: `Error al ${statusText} usuario`,
-        message: error.response?.data?.message || `No se pudo cambiar el estado del usuario.`,
+        title: "Error al reactivar usuario",
+        message: error.response?.data?.message || "No se pudo reactivar el usuario.",
+      });
+    }
+  };
+
+  const confirmSuspension = async () => {
+    if (!userToSuspend) return;
+    
+    if (!suspensionReason.trim()) {
+      addToast({ type: "error", title: "Error", message: "Debe proveer un motivo de suspensión." });
+      return;
+    }
+
+    const days = parseInt(suspendDays);
+    if (isNaN(days) || days <= 0) {
+      addToast({ type: "error", title: "Error", message: "La cantidad de días debe ser un número válido mayor a 0." });
+      return;
+    }
+
+    const suspendedUntil = new Date();
+    suspendedUntil.setDate(suspendedUntil.getDate() + days);
+
+    try {
+      const updated = await adminService.toggleUserBlock(
+        userToSuspend.id, 
+        "BLOCKED", 
+        suspensionReason.trim(), 
+        suspendedUntil.toISOString()
+      );
+      
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userToSuspend.id ? { ...u, status: updated.status } : u))
+      );
+
+      addToast({
+        type: "success",
+        title: "Usuario bloqueado",
+        message: `La cuenta de ${userToSuspend.name} ha sido suspendida hasta el ${suspendedUntil.toLocaleDateString()}.`,
+      });
+      setIsSuspendModalOpen(false);
+      setUserToSuspend(null);
+    } catch (error: any) {
+      addToast({
+        type: "error",
+        title: "Error al bloquear",
+        message: error.response?.data?.message || "No se pudo suspender al usuario.",
       });
     }
   };
@@ -657,6 +712,65 @@ export default function AdminDashboardPage() {
         </div>
 
       </div>
+
+      {/* Suspension Modal Overlay */}
+      {isSuspendModalOpen && userToSuspend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100">
+            <h3 className="text-xl font-bold text-text-primary mb-2 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-red-500" /> Suspender Usuario
+            </h3>
+            <p className="text-sm text-text-secondary mb-6">
+              Estás a punto de suspender la cuenta de <strong>{userToSuspend.name}</strong>. Esta acción evitará que inicie sesión hasta la fecha indicada.
+            </p>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <Input
+                  label="Motivo de suspensión"
+                  placeholder="Ej: Violación de términos"
+                  value={suspensionReason}
+                  onChange={(e) => setSuspensionReason(e.target.value)}
+                  className="w-full"
+                  required
+                />
+              </div>
+              <div>
+                <Input
+                  type="number"
+                  label="Duración (en días)"
+                  placeholder="1"
+                  value={suspendDays}
+                  onChange={(e) => setSuspendDays(e.target.value)}
+                  min="1"
+                  className="w-full"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="flat"
+                className="bg-gray-100 font-bold"
+                onClick={() => {
+                  setIsSuspendModalOpen(false);
+                  setUserToSuspend(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                color="danger"
+                className="font-bold shadow-brand-sm"
+                onClick={confirmSuspension}
+              >
+                Confirmar Suspensión
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

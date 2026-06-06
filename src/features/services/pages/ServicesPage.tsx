@@ -3,23 +3,23 @@ import { Link } from "react-router-dom";
 import { Button, Card, CardContent, Chip } from "@/components/ui/HeroUICompat";
 import { motion } from "framer-motion";
 import { 
-  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, Building, HelpCircle, ArrowRight 
+  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, HardHat, HelpCircle, ArrowRight 
 } from "lucide-react";
 import { usePageTitle } from "@/hooks";
 import { ROUTES } from "@/constants";
 import { technicianService } from "@/services";
 
 const CATEGORY_DETAILS: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; description: string; price: string }> = {
-  electrician: { icon: Zap, color: "bg-yellow-100 text-yellow-600", description: "Instalaciones eléctricas, tableros, iluminación y más.", price: "Desde $45.000/hr" },
-  plumber: { icon: Wrench, color: "bg-blue-100 text-blue-600", description: "Reparación de fugas, sanitarios y tuberías.", price: "Desde $40.000/hr" },
-  carpenter: { icon: Hammer, color: "bg-amber-100 text-amber-700", description: "Muebles a medida, pisos y estructuras de madera.", price: "Desde $50.000/hr" },
-  painter: { icon: PaintBucket, color: "bg-purple-100 text-purple-600", description: "Pintura de interiores, exteriores y texturas.", price: "Desde $35.000/hr" },
-  locksmith: { icon: Key, color: "bg-gray-100 text-gray-700", description: "Apertura de puertas, cerraduras digitales y más.", price: "Desde $55.000/hr" },
-  hvac: { icon: Wind, color: "bg-cyan-100 text-cyan-600", description: "Instalación y mantenimiento de aires acondicionados.", price: "Desde $60.000/hr" },
-  gardener: { icon: Leaf, color: "bg-green-100 text-green-600", description: "Diseño de jardines, poda y mantenimiento.", price: "Desde $28.000/hr" },
-  welder: { icon: Flame, color: "bg-red-100 text-red-600", description: "Soldadura en estructura metálica y rejas.", price: "Desde $48.000/hr" },
-  mason: { icon: Building, color: "bg-orange-100 text-orange-700", description: "Trabajos de albañilería, colocación de ladrillos y reformas.", price: "Desde $42.000/hr" },
-  cleaner: { icon: Sparkles, color: "bg-teal-100 text-teal-600", description: "Servicios de limpieza profunda para casas y oficinas.", price: "Desde $25.000/hr" },
+  electricista: { icon: Zap, color: "bg-yellow-100 text-yellow-600", description: "Instalaciones eléctricas, tableros, iluminación y más.", price: "Desde $45.000/hr" },
+  plomero: { icon: Wrench, color: "bg-blue-100 text-blue-600", description: "Reparación de fugas, sanitarios y tuberías.", price: "Desde $40.000/hr" },
+  carpintero: { icon: Hammer, color: "bg-amber-100 text-amber-700", description: "Muebles a medida, pisos y estructuras de madera.", price: "Desde $50.000/hr" },
+  pintor: { icon: PaintBucket, color: "bg-purple-100 text-purple-600", description: "Pintura de interiores, exteriores y texturas.", price: "Desde $35.000/hr" },
+  cerrajero: { icon: Key, color: "bg-gray-100 text-gray-700", description: "Apertura de puertas, cerraduras digitales y más.", price: "Desde $55.000/hr" },
+  climatizacion: { icon: Wind, color: "bg-cyan-100 text-cyan-600", description: "Instalación y mantenimiento de aires acondicionados.", price: "Desde $60.000/hr" },
+  jardinero: { icon: Leaf, color: "bg-green-100 text-green-600", description: "Diseño de jardines, poda y mantenimiento.", price: "Desde $28.000/hr" },
+  soldador: { icon: Flame, color: "bg-red-100 text-red-600", description: "Soldadura en estructura metálica y rejas.", price: "Desde $48.000/hr" },
+  albanil: { icon: HardHat, color: "bg-orange-100 text-orange-700", description: "Trabajos de albañilería, colocación de ladrillos y reformas.", price: "Desde $42.000/hr" },
+  limpieza: { icon: Sparkles, color: "bg-teal-100 text-teal-600", description: "Servicios de limpieza profunda para casas y oficinas.", price: "Desde $25.000/hr" },
 };
 
 export default function ServicesPage() {

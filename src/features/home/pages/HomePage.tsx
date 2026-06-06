@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
-  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame,
+  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, HardHat,
   ArrowRight, Shield, Star, CheckCircle, TrendingUp, Clock
 } from "lucide-react";
 import { usePageTitle } from "@/hooks";
@@ -20,16 +20,18 @@ import { HeroConnectionsCanvas } from "@/features/home/components/HeroConnection
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CATEGORY_CONFIG = [
-  { key: "electrician", icon: Zap, color: "bg-brand-purple/10 text-brand-purple" },
-  { key: "plumber", icon: Wrench, color: "bg-brand-purple/10 text-brand-purple" },
-  { key: "carpenter", icon: Hammer, color: "bg-brand-purple/10 text-brand-purple" },
-  { key: "painter", icon: PaintBucket, color: "bg-brand-purple/10 text-brand-purple" },
-  { key: "locksmith", icon: Key, color: "bg-brand-purple/10 text-brand-purple" },
-  { key: "hvac", icon: Wind, color: "bg-brand-purple/10 text-brand-purple" },
-  { key: "gardener", icon: Leaf, color: "bg-brand-purple/10 text-brand-purple" },
-  { key: "welder", icon: Flame, color: "bg-brand-purple/10 text-brand-purple" },
-] as const;
+const ICON_MAP: Record<string, { icon: any, color: string }> = {
+  electricista: { icon: Zap, color: "bg-yellow-500/10 text-yellow-600" },
+  plomero: { icon: Wrench, color: "bg-blue-500/10 text-blue-600" },
+  carpintero: { icon: Hammer, color: "bg-orange-500/10 text-orange-600" },
+  albanil: { icon: HardHat, color: "bg-gray-500/10 text-gray-600" },
+  pintor: { icon: PaintBucket, color: "bg-purple-500/10 text-purple-600" },
+  cerrajero: { icon: Key, color: "bg-red-500/10 text-red-600" },
+  climatizacion: { icon: Wind, color: "bg-cyan-500/10 text-cyan-600" },
+  limpieza: { icon: Sparkles, color: "bg-teal-500/10 text-teal-600" },
+  jardinero: { icon: Leaf, color: "bg-green-500/10 text-green-600" },
+  soldador: { icon: Flame, color: "bg-orange-600/10 text-orange-700" },
+};
 
 export const STATS = [
   { label: "Técnicos verificados", value: "2,500+", icon: Shield },
@@ -103,11 +105,18 @@ export default function HomePage() {
   }, []);
 
   const [featuredTechs, setFeaturedTechs] = useState<Technician[]>([]);
+  const [categories, setCategories] = useState<{ key: string; label: string }[]>([]);
 
   useEffect(() => {
+    technicianService.getCategories().then((data) => {
+      console.log("Categories data:", data);
+      setCategories(data.slice(0, 8));
+    });
+    
     technicianService.getAll({ isAvailable: true }).then((data) => {
-      const verified = data.filter((t) => t.isVerified);
-      setFeaturedTechs(verified.length > 0 ? verified.slice(0, 3) : data.slice(0, 3));
+      console.log("FeaturedTechs data:", data);
+      const sortedByRating = [...data].sort((a, b) => b.rating - a.rating);
+      setFeaturedTechs(sortedByRating.slice(0, 3));
     });
   }, []);
 
@@ -262,20 +271,31 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-            {CATEGORY_CONFIG.map(({ key, icon: Icon, color }) => (
-              <Link
-                key={key}
-                to={`${ROUTES.TECHNICIANS}?category=${key}`}
-                className="will-reveal group flex flex-col items-center gap-3 p-4 rounded-2xl border border-gray-100 hover:border-brand-purple/30 hover:shadow-brand bg-white hover:-translate-y-1 transition-all"
-              >
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color} group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-                <span className="text-xs font-semibold text-text-primary text-center leading-tight">
-                  {CATEGORY_LABELS[key]}
-                </span>
-              </Link>
-            ))}
+            {categories.map(({ key, label }, index) => {
+              const iconData = ICON_MAP[key] || { icon: Wrench, color: "bg-brand-purple/10 text-brand-purple" };
+              const Icon = iconData.icon;
+              return (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                >
+                  <Link
+                    to={`${ROUTES.TECHNICIANS}?category=${key}`}
+                    className="group flex flex-col items-center gap-3 p-4 rounded-2xl border border-gray-100 hover:border-brand-purple/30 hover:shadow-brand bg-white hover:-translate-y-1 transition-all h-full"
+                  >
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${iconData.color} group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <span className="text-xs font-semibold text-text-primary text-center leading-tight">
+                      {label}
+                    </span>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -306,12 +326,14 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredTechs.map((tech) => (
+            {featuredTechs.map((tech, index) => (
               <motion.div
                 key={tech.id}
-                className="will-reveal"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", stiffness: 300, damping: 20, delay: index * 0.1 }}
                 whileHover={{ y: -4 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <Link to={ROUTES.TECHNICIAN_DETAIL(tech.id)} className="block">
                   <Card

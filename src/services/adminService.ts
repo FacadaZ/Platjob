@@ -25,8 +25,13 @@ export const adminService = {
   },
 
   /** Bloquear o reactivar la cuenta de un usuario */
-  async toggleUserBlock(id: number, status: "ACTIVE" | "BLOCKED"): Promise<AdminUser> {
-    const response = await apiClient.patch<AdminUser>(`/admin/users/${id}/block`, { status });
+  async toggleUserBlock(id: number, status: "ACTIVE" | "BLOCKED", suspensionReason?: string, suspendedUntil?: string): Promise<AdminUser> {
+    const payload: any = { status };
+    if (status === "BLOCKED") {
+      payload.suspensionReason = suspensionReason;
+      payload.suspendedUntil = suspendedUntil;
+    }
+    const response = await apiClient.patch<AdminUser>(`/admin/users/${id}/block`, payload);
     return response.data;
   },
 

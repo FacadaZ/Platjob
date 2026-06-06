@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Avatar, Button, Input, Card, CardContent, } from "@/components/ui/HeroUICompat";
+import { Avatar, Button, Input, Card, CardContent } from "@/components/ui/HeroUICompat";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, MessageSquare, Briefcase, Calendar, DollarSign, Handshake } from "lucide-react";
+import { Send, MessageSquare, Briefcase, Calendar, DollarSign, Handshake, Trash2, AlertTriangle } from "lucide-react";
 import { chatService } from "@/services";
 import { useAuthStore } from "@/store";
 import type { ChatMessage, Conversation } from "@/types";
@@ -28,6 +28,13 @@ export default function ChatPage() {
   const [isNegotiating, setIsNegotiating] = useState(false);
   const [newPrice, setNewPrice] = useState("");
   const [newDate, setNewDate] = useState("");
+
+  // Delete state
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const onDeleteOpen = () => setIsDeleteOpen(true);
+  const onDeleteOpenChange = () => setIsDeleteOpen(!isDeleteOpen);
+  
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { sendMessage, socket } = useSocket(activeConvId);
 
@@ -123,8 +130,9 @@ export default function ChatPage() {
       setNewPrice("");
       setNewDate("");
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-      // Trigger a socket refresh just in case
-      socket?.emit("send_message", { conversationId: activeConvId, content: "Nueva propuesta de negociación enviada." });
+      
+      // Notify the other user with the actual message object
+      socket?.emit("notify_new_message", msg);
     } catch (e: any) {
       alert("Error: " + e.message);
     }
@@ -137,9 +145,28 @@ export default function ChatPage() {
       setMessages(prev => prev.map(m => m.id === msgId ? { ...m, type: "NEGOTIATION_ACCEPTED" } : m));
       setMessages(prev => [...prev, msg]);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-      socket?.emit("send_message", { conversationId: activeConvId, content: "Propuesta aceptada." });
+      
+      // Notify the other user with the actual accepted message object
+      socket?.emit("notify_new_message", msg);
     } catch (e: any) {
       alert("Error: " + e.message);
+    }
+  };
+
+  const handleDeleteConversation = async () => {
+    if (!activeConvId) return;
+    setIsDeleting(true);
+    try {
+      await chatService.deleteConversation(activeConvId);
+      // Remove conversation from state
+      setConversations(prev => prev.filter(c => c.id !== activeConvId));
+      setMessages([]);
+      setActiveConvId(null);
+      onDeleteOpenChange(); // close modal
+    } catch (e: any) {
+      alert("Error al eliminar conversación: " + e.message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -207,15 +234,27 @@ export default function ChatPage() {
           <CardContent className="p-0 flex flex-col h-full">
             {/* Header */}
             {activeConv && (
-              <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-white">
-                <Avatar src={activeConv.participantAvatar} name={activeConv.participantName} size="sm" />
-                <div>
-                  <p className="font-bold text-sm text-text-primary">{activeConv.participantName}</p>
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-green-400" />
-                    <span className="text-xs text-green-600 font-medium">En línea</span>
+              <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white">
+                <div className="flex items-center gap-3">
+                  <Avatar src={activeConv.participantAvatar} name={activeConv.participantName} size="sm" />
+                  <div>
+                    <p className="font-bold text-sm text-text-primary">{activeConv.participantName}</p>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-400" />
+                      <span className="text-xs text-green-600 font-medium">En línea</span>
+                    </div>
                   </div>
                 </div>
+                
+                <Button
+                  isIconOnly
+                  variant="light"
+                  color="danger"
+                  className="text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  onPress={onDeleteOpen}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             )}
 
@@ -396,6 +435,46 @@ export default function ChatPage() {
           </CardContent>
         </Card>
       </div>
+      {/* Custom Delete Confirmation Modal */}
+      <AnimatePresence>
+        {isDeleteOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col"
+            >
+              <div className="flex flex-col gap-1 items-center pt-8 px-6">
+                <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-2">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-black text-text-primary">¿Eliminar Conversación?</h3>
+              </div>
+              <div className="text-center pb-6 pt-4 px-6">
+                <p className="text-text-secondary text-sm">
+                  Esta acción no se puede deshacer. Todos los mensajes intercambiados con 
+                  <strong className="text-text-primary mx-1">{activeConv?.participantName}</strong> 
+                  serán eliminados de forma permanente.
+                </p>
+              </div>
+              <div className="flex justify-center gap-3 pb-8 px-6">
+                <Button variant="flat" onPress={onDeleteOpenChange} className="font-bold rounded-xl bg-gray-100">
+                  Cancelar
+                </Button>
+                <Button 
+                  color="danger" 
+                  onPress={handleDeleteConversation} 
+                  isLoading={isDeleting}
+                  className="font-bold rounded-xl shadow-md"
+                >
+                  Sí, eliminar chat
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
