@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
-  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, HardHat,
+  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame,
   ArrowRight, Shield, Star, CheckCircle, TrendingUp, Clock
 } from "lucide-react";
 import { usePageTitle } from "@/hooks";
@@ -21,16 +21,14 @@ import { HeroConnectionsCanvas } from "@/features/home/components/HeroConnection
 gsap.registerPlugin(ScrollTrigger);
 
 const ICON_MAP: Record<string, { icon: any, color: string }> = {
-  electricista: { icon: Zap, color: "bg-yellow-500/10 text-yellow-600" },
-  plomero: { icon: Wrench, color: "bg-blue-500/10 text-blue-600" },
-  carpintero: { icon: Hammer, color: "bg-orange-500/10 text-orange-600" },
-  albanil: { icon: HardHat, color: "bg-gray-500/10 text-gray-600" },
-  pintor: { icon: PaintBucket, color: "bg-purple-500/10 text-purple-600" },
-  cerrajero: { icon: Key, color: "bg-red-500/10 text-red-600" },
-  climatizacion: { icon: Wind, color: "bg-cyan-500/10 text-cyan-600" },
-  limpieza: { icon: Sparkles, color: "bg-teal-500/10 text-teal-600" },
-  jardinero: { icon: Leaf, color: "bg-green-500/10 text-green-600" },
-  soldador: { icon: Flame, color: "bg-orange-600/10 text-orange-700" },
+  electrician: { icon: Zap, color: "bg-brand-purple/10 text-brand-purple" },
+  plumber: { icon: Wrench, color: "bg-brand-purple/10 text-brand-purple" },
+  carpenter: { icon: Hammer, color: "bg-brand-purple/10 text-brand-purple" },
+  painter: { icon: PaintBucket, color: "bg-brand-purple/10 text-brand-purple" },
+  locksmith: { icon: Key, color: "bg-brand-purple/10 text-brand-purple" },
+  hvac: { icon: Wind, color: "bg-brand-purple/10 text-brand-purple" },
+  gardener: { icon: Leaf, color: "bg-brand-purple/10 text-brand-purple" },
+  welder: { icon: Flame, color: "bg-brand-purple/10 text-brand-purple" },
 };
 
 export const STATS = [
@@ -109,12 +107,10 @@ export default function HomePage() {
 
   useEffect(() => {
     technicianService.getCategories().then((data) => {
-      console.log("Categories data:", data);
       setCategories(data.slice(0, 8));
     });
-    
+
     technicianService.getAll({ isAvailable: true }).then((data) => {
-      console.log("FeaturedTechs data:", data);
       const sortedByRating = [...data].sort((a, b) => b.rating - a.rating);
       setFeaturedTechs(sortedByRating.slice(0, 3));
     });
