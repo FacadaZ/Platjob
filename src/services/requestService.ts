@@ -109,13 +109,8 @@ export const reviewService = {
 
   async getByClientId(clientId: string): Promise<Review[]> {
     try {
-      // If backend has no direct GET /reviews/client/{clientId}, we can return empty or filter if we get all.
-      // But according to platjob_backend.md, we can write reviews or get them per technician.
-      // Let's call /reviews/technician/{id} if needed, or query if available.
-      // Since it's only for "My Reviews", let's return a simulated or empty array if not directly supported,
-      // or assume we get requests and find reviews. Let's try GET /reviews if it exists, otherwise return empty array.
-      const response = await apiClient.get<any[]>("/reviews").catch(() => ({ data: [] }));
-      return response.data.filter((r: any) => r.clientId === clientId).map(mapReviewToFrontend);
+      const response = await apiClient.get<any[]>(`/reviews/client/${clientId}`);
+      return response.data.map(mapReviewToFrontend);
     } catch (error) {
       console.error("Error in reviewService.getByClientId:", error);
       return [];
