@@ -56,19 +56,19 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black text-text-primary">Mi Perfil</h1>
-        <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-3xl font-black text-text-primary self-start sm:self-auto">Mi Perfil</h1>
+        <div className="flex flex-row w-full sm:w-auto gap-3">
           <Button
             onPress={() => navigate(ROUTES.PROFILE_EDIT)}
-            className="bg-brand-gradient text-white font-bold h-11 px-6 rounded-xl shadow-brand hover:shadow-brand-lg transition-all"
+            className="flex-1 sm:flex-none bg-brand-gradient text-white font-bold h-11 px-4 sm:px-6 rounded-xl shadow-brand hover:shadow-brand-lg transition-all"
             startContent={<Edit className="w-4 h-4" />}
           >
             Editar Perfil
           </Button>
           <Button
             variant="flat"
-            className="bg-gray-100 text-text-primary font-bold h-11 px-6 rounded-xl hover:bg-gray-200 transition-all"
+            className="flex-1 sm:flex-none bg-gray-100 text-text-primary font-bold h-11 px-4 sm:px-6 rounded-xl hover:bg-gray-200 transition-all"
             startContent={<Share2 className="w-4 h-4" />}
           >
             Compartir
@@ -89,9 +89,9 @@ export default function ProfilePage() {
                 />
                 <div className="absolute inset-0 rounded-full ring-1 ring-black/5" />
               </div>
-              <div className="pb-2 flex flex-col items-center sm:items-start">
-                <h2 className="text-3xl font-black text-white drop-shadow-md tracking-tight leading-tight">{user?.name}</h2>
-                <span className="text-sm text-white font-bold drop-shadow-sm uppercase tracking-wider">
+              <div className="pb-2 flex flex-col items-center sm:items-start text-center sm:text-left mt-4 sm:mt-0">
+                <h2 className="text-3xl font-black text-text-primary tracking-tight leading-tight mb-2">{user?.name}</h2>
+                <span className="text-xs text-white bg-brand-blue/90 px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-sm">
                   {user?.role === "client" ? "Cliente" : user?.role === "admin" ? "Admin" : "Técnico"}
                 </span>
                 {user?.role === "technician" && techCategory && (

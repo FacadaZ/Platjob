@@ -65,7 +65,8 @@ export function AppNavbar() {
   );
 
   return (
-    <nav className={clsx(
+    <>
+      <nav className={clsx(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-16 border-b",
       isScrolled || !isHome
         ? "bg-white/95 backdrop-blur-md border-gray-100 shadow-brand-sm"
@@ -243,6 +244,8 @@ export function AppNavbar() {
         </div>
       </div>
 
+      </nav>
+
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
         <div className="fixed inset-0 top-16 bg-white z-40 sm:hidden animate-in fade-in slide-in-from-top-4 duration-200">
@@ -294,6 +297,6 @@ export function AppNavbar() {
           </div>
         </div>
       )}
-    </nav>
+    </>
   );
 }
