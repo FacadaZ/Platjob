@@ -91,8 +91,8 @@ export default function ProfilePage() {
               </div>
               <div className="pb-2 flex flex-col items-center sm:items-start">
                 <h2 className="text-3xl font-black text-white drop-shadow-md tracking-tight leading-tight">{user?.name}</h2>
-                <span className="text-sm text-brand-orange font-bold drop-shadow-sm uppercase tracking-wider">
-                  {user?.role === "client" ? "Cliente" : "Técnico"}
+                <span className="text-sm text-white font-bold drop-shadow-sm uppercase tracking-wider">
+                  {user?.role === "client" ? "Cliente" : user?.role === "admin" ? "Admin" : "Técnico"}
                 </span>
                 {user?.role === "technician" && techCategory && (
                   <span className="flex items-center gap-1.5 text-xs text-white/80 font-medium mt-1 drop-shadow-sm">

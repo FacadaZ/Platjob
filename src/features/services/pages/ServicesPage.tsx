@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, Card, CardContent, Chip } from "@/components/ui/HeroUICompat";
 import { motion } from "framer-motion";
 import { 
-  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, HardHat, HelpCircle, ArrowRight 
+  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, HardHat, HelpCircle, ArrowRight, Briefcase 
 } from "lucide-react";
 import { usePageTitle } from "@/hooks";
 import { ROUTES } from "@/constants";
@@ -60,8 +60,10 @@ export default function ServicesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((cat, i) => {
-            const details = CATEGORY_DETAILS[cat.key] || {
-              icon: HelpCircle,
+            const keyLower = cat.key?.toLowerCase() || "";
+            const labelLower = cat.label?.toLowerCase() || "";
+            const details = CATEGORY_DETAILS[keyLower] || CATEGORY_DETAILS[labelLower] || {
+              icon: Briefcase,
               color: "bg-gray-100 text-gray-600",
               description: `Servicios profesionales de ${cat.label}.`,
               price: "Consultar tarifa",
@@ -78,11 +80,7 @@ export default function ServicesPage() {
                 <Card className="h-full bg-white border border-gray-100 shadow-brand-sm hover:shadow-brand transition-shadow">
                   <CardContent className="p-6 flex flex-col">
                     <div className={`w-14 h-14 rounded-2xl ${details.color} flex items-center justify-center mb-4 text-xl`}>
-                      {details.icon === HelpCircle ? (
-                        <span>{cat.icon}</span>
-                      ) : (
-                        <Icon className="w-7 h-7" />
-                      )}
+                      <Icon className="w-7 h-7" />
                     </div>
                     <h2 className="text-lg font-bold text-text-primary mb-2">{cat.label}</h2>
                     <p className="text-sm text-text-secondary leading-relaxed flex-1">{details.description}</p>

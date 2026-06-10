@@ -188,10 +188,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Demo hint */}
-          <div className="bg-brand-blue/5 border border-brand-blue/15 rounded-xl p-3 text-xs text-center text-text-secondary">
-            🔐 Demo: <strong>carlos@example.com</strong> / cualquier contraseña
-          </div>
 
           <p className="text-center text-sm text-text-secondary">
             ¿No tienes cuenta?{" "}
