@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, Card, CardContent, Chip } from "@/components/ui/HeroUICompat";
 import { motion } from "framer-motion";
 import { 
-  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, HardHat, HelpCircle, ArrowRight, Briefcase 
+  Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame, Sparkles, HardHat, ArrowRight, Briefcase 
 } from "lucide-react";
 import { usePageTitle } from "@/hooks";
 import { ROUTES } from "@/constants";
