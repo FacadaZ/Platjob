@@ -6,7 +6,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Zap, Wrench, Hammer, PaintBucket, Key, Wind, Leaf, Flame,
-  ArrowRight, Shield, Star, CheckCircle, TrendingUp, Clock
+  ArrowRight, Shield, Star, CheckCircle, TrendingUp, Clock,
+  Instagram, Facebook
 } from "lucide-react";
 import { usePageTitle } from "@/hooks";
 import { ROUTES, CATEGORY_LABELS } from "@/constants";
@@ -437,10 +438,20 @@ export default function HomePage() {
       {/* ── Footer ─────────────────────────────────────────── */}
       <footer className="bg-brand-blue py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <p className="text-white/50 text-sm text-center">
-              © 2025 PlatJob. Todos los derechos reservados.
-            </p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col items-center md:items-start gap-4">
+              <p className="text-white/50 text-sm text-center md:text-left">
+                © 2025 PlatJob. Todos los derechos reservados.
+              </p>
+              <div className="flex gap-4">
+                <a href="https://www.instagram.com/platjob.bo?igsh=MXFvM2ZtZGNkcXU4eA==" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors" aria-label="Instagram">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="https://www.facebook.com/share/1EAsQwfaeR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors" aria-label="Facebook">
+                  <Facebook className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
             <div className="flex gap-6 text-sm text-white/60">
               <a href="#" className="hover:text-white transition-colors">Privacidad</a>
               <a href="#" className="hover:text-white transition-colors">Términos</a>
