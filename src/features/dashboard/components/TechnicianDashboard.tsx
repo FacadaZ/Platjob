@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Button, Card, CardContent, Chip, Separator } from "@/components/ui/HeroUICompat";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardList, TrendingUp, Star, MapPin,
   MessageSquare, DollarSign, Calendar, Clock, Check, X, AlertCircle,
-  ShieldCheck, ShieldAlert
+  ShieldCheck, ShieldAlert, Crown
 } from "lucide-react";
 import { technicianService, requestService, reviewService, chatService } from "@/services";
 import { StarRating } from "@/components/ui/StarRating";
@@ -26,6 +26,10 @@ export function TechnicianDashboard({ usuario }: PropsPanelTecnico) {
   const [solicitudes, setSolicitudes] = useState<ServiceRequest[]>([]);
   const [resenasTecnico, setResenasTecnico] = useState<Review[]>([]);
   const [estaCargando, setEstaCargando] = useState(true);
+
+  // MOCKED PREMIUM STATE
+  const [isPremiumMock, setIsPremiumMock] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   useEffect(() => {
     if (!usuario.id) return;
@@ -82,6 +86,16 @@ export function TechnicianDashboard({ usuario }: PropsPanelTecnico) {
 
   // Handle request state transition in real-time on backend
   const actualizarEstadoSolicitud = async (id: string, nuevoEstado: "accepted" | "in_progress" | "completed" | "cancelled") => {
+    // --- MOCK PREMIUM CHECK ---
+    if (nuevoEstado === "accepted" && !isPremiumMock) {
+      const acceptedCount = solicitudes.filter(r => r.status === "accepted" || r.status === "in_progress" || r.status === "completed").length;
+      if (acceptedCount >= 2) {
+        setShowPremiumModal(true);
+        return; // BLOQUEAR ACCIÓN Y MOSTRAR MODAL
+      }
+    }
+    // --------------------------
+
     try {
       await requestService.updateStatus(id, nuevoEstado);
       setSolicitudes((prev) =>
@@ -429,6 +443,19 @@ export function TechnicianDashboard({ usuario }: PropsPanelTecnico) {
                 <span className="text-text-secondary font-medium">Tarifa base por hr:</span>
                 <span className="text-text-primary font-bold">{formatCurrency(perfilTecnico.hourlyRate)}/hr</span>
               </div>
+              <div className="flex justify-between py-1 items-center">
+                <span className="text-text-secondary font-medium">Plan Actual:</span>
+                {isPremiumMock ? (
+                  <span className="text-amber-500 font-bold flex items-center gap-1 uppercase tracking-wider text-xs bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    <Crown className="w-3.5 h-3.5 fill-current" /> Premium
+                  </span>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 font-bold uppercase tracking-wider text-xs">Gratuito</span>
+                    <button onClick={() => setShowPremiumModal(true)} className="text-xs text-white bg-brand-purple hover:bg-brand-purple-dark font-bold px-2 py-0.5 rounded-md transition-all shadow-brand-sm">Mejorar</button>
+                  </div>
+                )}
+              </div>
               <div className="flex justify-between py-1">
                 <span className="text-text-secondary font-medium">Tiempo respuesta:</span>
                 <span className="text-text-primary font-bold">{perfilTecnico.responseTime}</span>
@@ -480,6 +507,76 @@ export function TechnicianDashboard({ usuario }: PropsPanelTecnico) {
           </div>
         </div>
       </div>
+
+      {/* ── MOCKED PREMIUM PAYWALL MODAL ── */}
+      <AnimatePresence>
+        {showPremiumModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowPremiumModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden z-10"
+            >
+              <div className="bg-brand-gradient p-6 text-white text-center space-y-2">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2 border-2 border-white/30">
+                  <Crown className="w-8 h-8 text-amber-300" />
+                </div>
+                <h2 className="text-2xl font-black">Límite Gratuito Alcanzado</h2>
+                <p className="text-white/80 text-sm">Has aceptado tus 2 solicitudes gratuitas.</p>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-bold text-center text-text-primary text-lg">Pásate a PlatJob Premium</h3>
+                  <ul className="space-y-3 text-sm text-text-secondary font-medium max-w-[250px] mx-auto">
+                    <li className="flex items-center gap-3"><Check className="w-5 h-5 text-green-500 flex-shrink-0" /> <strong>Solicitudes ilimitadas</strong> cada mes.</li>
+                    <li className="flex items-center gap-3"><Check className="w-5 h-5 text-green-500 flex-shrink-0" /> <strong>Posicionamiento destacado</strong> en búsquedas.</li>
+                    <li className="flex items-center gap-3"><Check className="w-5 h-5 text-green-500 flex-shrink-0" /> <strong>Portafolio ilimitado</strong> de imágenes.</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
+                  <div className="text-4xl font-black text-amber-600">Bs. 99<span className="text-sm font-bold text-amber-600/70">/mes</span></div>
+                  <p className="text-xs text-amber-700 mt-1 font-medium">Cancela cuando quieras.</p>
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button
+                    variant="flat"
+                    className="flex-1 font-bold bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    onPress={() => setShowPremiumModal(false)}
+                  >
+                    Quizás luego
+                  </Button>
+                  <Button
+                    className="flex-1 font-bold bg-amber-500 text-white hover:bg-amber-600 shadow-brand-sm"
+                    onPress={() => {
+                      setIsPremiumMock(true);
+                      setShowPremiumModal(false);
+                      addToast({
+                        type: "success",
+                        title: "¡Bienvenido a Premium! 👑",
+                        message: "Tu pago simulado fue exitoso. Ahora tienes acceso ilimitado a solicitudes de trabajo."
+                      });
+                    }}
+                  >
+                    Pagar y Mejorar
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
