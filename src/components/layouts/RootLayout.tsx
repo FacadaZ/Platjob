@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { AppNavbar } from "@/components/shared/AppNavbar";
 import { ToastStack } from "@/components/ui/ToastStack";
+import { ChatbotWidget } from "@/components/shared/ChatbotWidget";
 
 /** Main authenticated app layout with navbar */
 export function RootLayout() {
@@ -10,6 +11,7 @@ export function RootLayout() {
       <main className="flex-1 pt-16">
         <Outlet />
       </main>
+      <ChatbotWidget />
       <ToastStack />
     </div>
   );
