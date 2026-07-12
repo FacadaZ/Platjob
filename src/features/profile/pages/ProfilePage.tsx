@@ -90,7 +90,7 @@ export default function ProfilePage() {
                 <div className="absolute inset-0 rounded-full ring-1 ring-black/5" />
               </div>
               <div className="pb-2 flex flex-col items-center sm:items-start text-center sm:text-left mt-4 sm:mt-0">
-                <h2 className="text-3xl font-black text-text-primary tracking-tight leading-tight mb-2">{user?.name}</h2>
+                <h2 className="text-3xl font-black text-white tracking-tight leading-tight mb-2">{user?.name}</h2>
                 <span className="text-xs text-white bg-brand-blue/90 px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-sm">
                   {user?.role === "client" ? "Cliente" : user?.role === "admin" ? "Admin" : "Técnico"}
                 </span>

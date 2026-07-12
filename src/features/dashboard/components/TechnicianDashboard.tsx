@@ -452,7 +452,7 @@ export function TechnicianDashboard({ usuario }: PropsPanelTecnico) {
                 ) : (
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 font-bold uppercase tracking-wider text-xs">Gratuito</span>
-                    <button onClick={() => setShowPremiumModal(true)} className="text-xs text-white bg-brand-purple hover:bg-brand-purple-dark font-bold px-2 py-0.5 rounded-md transition-all shadow-brand-sm">Mejorar</button>
+                    <button onClick={() => setShowPremiumModal(true)} className="text-xs text-white bg-green-500 hover:bg-green-600 font-bold px-2 py-0.5 rounded-md transition-all shadow-brand-sm">Mejorar</button>
                   </div>
                 )}
               </div>
@@ -551,13 +551,13 @@ export function TechnicianDashboard({ usuario }: PropsPanelTecnico) {
                 <div className="flex gap-3">
                   <Button
                     variant="flat"
-                    className="flex-1 font-bold bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    className="flex-1 font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl h-12 shadow-sm"
                     onPress={() => setShowPremiumModal(false)}
                   >
                     Quizás luego
                   </Button>
                   <Button
-                    className="flex-1 font-bold bg-amber-500 text-white hover:bg-amber-600 shadow-brand-sm"
+                    className="flex-1 font-bold bg-amber-500 text-white hover:bg-amber-600 shadow-brand-sm rounded-xl h-12"
                     onPress={() => {
                       setIsPremiumMock(true);
                       setShowPremiumModal(false);
